@@ -1,13 +1,21 @@
 {
   "name": "@rogerchappel/repo-review-skill",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "Review any code repo like a practical maintainer; output prioritized, testable improvement tasks for agents.",
+  "main": "src/index.js",
+  "bin": {
+    "repo-review-skill": "bin/repo-review-skill.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "scripts": {
+    "test": "node --test test/",
+    "check": "node --check src/*.js",
+    "smoke": "bin/repo-review-skill.js ./fixtures/demo-repo --out ./_review_out --no-fs-write"
+  },
+  "keywords": ["repo-review", "agent-skill", "maintenance", "quality-audit", "cli"],
+  "author": "Roger Chappel",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  }
 }
