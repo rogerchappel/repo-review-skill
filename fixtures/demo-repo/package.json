@@ -1,0 +1,10 @@
+{
+  "name": "demo-app",
+  "version": "0.1.0",
+  "description": "A demo project for testing repo-review-skill",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "license": "MIT"
+}
