@@ -31,20 +31,20 @@ function inspectReadme(repoPath, _opts = {}) {
       fix: 'Add a `# Project Name` heading at the top.' });
   }
 
-  if (!/(?i)(install|usage|quickstart|getting.started)/i.test(content)) {
+  if (!/(install|usage|quickstart|getting.started)/i.test(content)) {
     issues.push({ id: 'readme-no-install', category: 'readme', severity: 'high',
       title: 'README has no installation or usage section', description: 'Users don\'t know how to get started.',
       fix: 'Add an Install, Quickstart, or Usage section with copy-paste commands.' });
   }
 
-  if (!/(?i)(license|contributing|test|example)/i.test(content)) {
+  if (!/(license|contributing|test|example)/i.test(content)) {
     issues.push({ id: 'readme-missing-sections', category: 'readme', severity: 'low',
       title: 'README lacks license, contributing, test, or example sections', description: 'Common sections help contributors.',
       fix: 'Add at least License and Contributing sections.' });
   }
 
   // Check for TODO placeholder
-  if (/(?i)\b(TBD|TODO|FIXME|placeholder)\b/.test(content)) {
+  if (/\b(TBD|TODO|FIXME|placeholder)\b/i.test(content)) {
     issues.push({ id: 'readme-placeholders', category: 'readme', severity: 'medium',
       title: 'README contains placeholder text (TBD/TODO/FIXME)', description: 'Placeholders reduce credibility for visitors.',
       fix: 'Replace placeholder text with real content.' });
