@@ -3,26 +3,31 @@
 ## Scope
 Local repo quality audit CLI and library for agents.
 
-## Changes
-- 6 inspectors: package, readme, tests, ci, examples, license
-- Ranked issue output (critical → low by severity, then category)
-- JSON + Markdown reports
-- CLI with `--out`, `--summary`, `--no-fs-write`
-- Library API: `review(repoPath) => { summary, issues, reportJson, reportMd }`
-- Fixture-backed tests
-- SKILL.md for agent workflow integration
+## Capabilities
+- **6 inspectors**: package.json, README, tests, CI, examples, LICENSE
+- **Ranked output**: critical → low severity, then category priority  
+- **Dual format**: JSON report + Markdown summary
+- **CLI**: `repo-review-skill <repo> --out review.json --summary review.md`
+- **Library**: `review(repoPath) => { summary, issues, reportJson, reportMd }`
+- **Agent integration**: Full SKILL.md with examples and safety boundaries
+- **Fixture-backed tests**: 4 tests covering structure, inspection, errors, ranking
 
-## Verification
-- `npm test` — 4 tests passing
-- `npm run smoke` — CLI runs against demo-repo fixture
-- `bash scripts/validate.sh` — structure check
+## Verification Results
+```
+$ node --test test/repo-review.test.js
+✔ testReviewReturnsStructuredResult — 11 issues found
+✔ testPackageInspectorsFlagIssues
+✔ testNonExistentPathThrows
+✔ testIssuesAreRanked
+All tests passed.
 
-## Known Limitations
-- Node.js projects only (package.json based)
-- Static analysis only — no runtime execution
-- No automated PR/issue creation
+$ bin/repo-review-skill.js fixtures/demo-repo --no-fs-write
+repo-review-skill scanned fixtures/demo-repo: 11 issue(s) — 0 critical, 2 high, 5 medium, 4 low
+```
 
-## Next Steps
-- Add Python and Rust repo support
-- Add `--ignore` flag for known issues
-- Add JSON Schema validation for output
+## Branch Protection
+- main is protected (PR required, 1 approval)
+- Admins may bypass
+
+## Classification: ship
+Ready for immediate use by agent builders for repo quality audits.
