@@ -7,7 +7,7 @@
     "repo-review-skill": "bin/repo-review-skill.js"
   },
   "scripts": {
-    "test": "node --test test/",
+    "test": "node --test test/*.test.js",
     "check": "node --check src/*.js",
     "smoke": "bin/repo-review-skill.js ./fixtures/demo-repo --out ./_review_out --no-fs-write"
   },
