@@ -67,3 +67,11 @@ repo-review-skill scanned /Users/roger/my-repo: 8 issue(s) — 1 critical, 3 hig
 ## For Agents
 
 See [SKILL.md](./SKILL.md) for agent workflow integration.
+
+## Verification
+
+Use the package scripts as the public smoke gates before publishing or changing CLI behavior.
+
+- `npm run test`
+- `npm run smoke`
+- `npm run check`

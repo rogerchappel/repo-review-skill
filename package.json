@@ -11,11 +11,25 @@
     "check": "node --check src/*.js",
     "smoke": "bin/repo-review-skill.js ./fixtures/demo-repo --out ./_review_out --no-fs-write"
   },
-  "keywords": ["repo-review", "agent-skill", "maintenance", "quality-audit", "cli"],
+  "keywords": [
+    "repo-review",
+    "agent-skill",
+    "maintenance",
+    "quality-audit",
+    "cli"
+  ],
   "author": "Roger Chappel",
   "license": "MIT",
   "type": "commonjs",
   "engines": {
     "node": ">=18"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/repo-review-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/repo-review-skill/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/repo-review-skill#readme"
 }
