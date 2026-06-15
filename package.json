@@ -31,5 +31,12 @@
   "bugs": {
     "url": "https://github.com/rogerchappel/repo-review-skill/issues"
   },
-  "homepage": "https://github.com/rogerchappel/repo-review-skill#readme"
+  "homepage": "https://github.com/rogerchappel/repo-review-skill#readme",
+  "files": [
+    "src",
+    "bin",
+    "fixtures",
+    "docs",
+    "README.md"
+  ]
 }
