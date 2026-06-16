@@ -9,7 +9,9 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "check": "node --check src/*.js",
-    "smoke": "bin/repo-review-skill.js ./fixtures/demo-repo --out ./_review_out --no-fs-write"
+    "smoke": "bin/repo-review-skill.js ./fixtures/demo-repo --out ./_review_out --no-fs-write",
+    "package:smoke": "npm pack --dry-run",
+    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
     "repo-review",

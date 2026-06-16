@@ -70,6 +70,18 @@ See [SKILL.md](./SKILL.md) for agent workflow integration.
 
 ## Verification
 
+```bash
+npm run check
+npm test
+npm run smoke
+npm run package:smoke
+npm run release:check
+```
+
+Use `npm run release:check` before publishing or opening a release PR.
+
+## Verification
+
 Use the package scripts as the public smoke gates before publishing or changing CLI behavior.
 
 - `npm run test`
