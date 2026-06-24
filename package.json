@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check": "node --check src/*.js",
+    "check": "find bin src scripts test -name '*.js' -print0 | xargs -0 -n1 node --check",
     "smoke": "bin/repo-review-skill.js ./fixtures/demo-repo --out ./_review_out --no-fs-write",
     "package:smoke": "node scripts/package-smoke.js",
     "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
