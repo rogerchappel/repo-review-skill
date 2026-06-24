@@ -80,10 +80,8 @@ npm run release:check
 
 Use `npm run release:check` before publishing or opening a release PR.
 
-## Verification
+## Release Notes
 
-Use the package scripts as the public smoke gates before publishing or changing CLI behavior.
-
-- `npm run test`
-- `npm run smoke`
-- `npm run check`
+Keep [CHANGELOG.md](./CHANGELOG.md) updated with user-facing changes before
+publishing. For release-candidate review notes, see
+[docs/RELEASE_CANDIDATE.md](./docs/RELEASE_CANDIDATE.md).
