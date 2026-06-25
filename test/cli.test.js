@@ -7,6 +7,14 @@ const test = require('node:test');
 
 const BIN = path.join(__dirname, '..', 'bin', 'repo-review-skill.js');
 const FIXTURE_DEMO = path.join(__dirname, '..', 'fixtures', 'demo-repo');
+const pkg = require('../package.json');
+
+test('CLI prints the package version', () => {
+  const result = spawnSync(process.execPath, [BIN, '--version'], { encoding: 'utf8' });
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.equal(result.stdout.trim(), pkg.version);
+});
 
 test('CLI accepts output flags before the repo path', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-cli-'));

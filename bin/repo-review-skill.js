@@ -9,10 +9,16 @@
  */
 const path = require('path');
 const fs = require('fs');
+const pkg = require('../package.json');
 const { review } = require('../src');
 
 async function main() {
   const args = process.argv.slice(2);
+
+  if (args.includes('--version') || args.includes('-v')) {
+    console.log(pkg.version);
+    process.exit(0);
+  }
 
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
     console.log(`repo-review-skill — Review a local code repo like a practical maintainer.
@@ -24,6 +30,7 @@ Options:
   --out <file>        Write JSON report to file
   --summary <file>    Write Markdown summary to file
   --no-fs-write       Dry-run mode: print reports without writing files
+  --version, -v       Show package version
   --help, -h          Show this help
 
 Examples:
