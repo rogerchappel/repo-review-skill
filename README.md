@@ -10,6 +10,7 @@ npm install -g @rogerchappel/repo-review-skill
 
 # Review a repo
 repo-review-skill ./my-project --out review.json --summary review.md
+repo-review-skill --out review.json --summary review.md ./my-project
 
 # Or run without installing globally
 npx @rogerchappel/repo-review-skill ./my-project --no-fs-write
@@ -33,6 +34,7 @@ Options:
   --out <file>        Write JSON report to <file>
   --summary <file>    Write Markdown summary to <file>
   --no-fs-write       Preview mode: print without writing files
+  --version, -v       Show package version
   --help              Show this help
 ```
 
