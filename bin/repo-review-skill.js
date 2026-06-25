@@ -34,10 +34,8 @@ Examples:
     process.exit(0);
   }
 
-  const repoPath = args.find(a => !a.startsWith('-'));
-  const outFlag = getFlag(args, '--out');
-  const summaryFlag = getFlag(args, '--summary');
-  const noFsWrite = args.includes('--no-fs-write');
+  const parsed = parseArgs(args);
+  const { repoPath, outFlag, summaryFlag, noFsWrite } = parsed;
 
   if (!repoPath) {
     console.error('Error: repo path is required');
@@ -82,6 +80,32 @@ function getFlag(args, flag) {
   const idx = args.indexOf(flag);
   if (idx === -1 || idx + 1 >= args.length) return null;
   return args[idx + 1];
+}
+
+function parseArgs(args) {
+  const outFlag = getFlag(args, '--out');
+  const summaryFlag = getFlag(args, '--summary');
+  const noFsWrite = args.includes('--no-fs-write');
+  const flagsWithValues = new Set(['--out', '--summary']);
+  let repoPath = null;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+
+    if (flagsWithValues.has(arg)) {
+      i += 1;
+      continue;
+    }
+
+    if (arg.startsWith('-')) {
+      continue;
+    }
+
+    repoPath = arg;
+    break;
+  }
+
+  return { repoPath, outFlag, summaryFlag, noFsWrite };
 }
 
 main();
