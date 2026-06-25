@@ -1,4 +1,5 @@
 const { spawnSync } = require('node:child_process');
+const pkg = require('../package.json');
 
 const requiredFiles = [
   'bin/repo-review-skill.js',
@@ -34,4 +35,18 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-console.log(`package smoke passed; checked ${requiredFiles.length} required files`);
+const versionResult = spawnSync(process.execPath, ['bin/repo-review-skill.js', '--version'], {
+  encoding: 'utf8',
+});
+
+if (versionResult.status !== 0) {
+  process.stderr.write(versionResult.stderr);
+  process.exit(versionResult.status || 1);
+}
+
+if (versionResult.stdout.trim() !== pkg.version) {
+  console.error(`package smoke failed; expected CLI version ${pkg.version}, got ${versionResult.stdout.trim()}`);
+  process.exit(1);
+}
+
+console.log(`package smoke passed; checked ${requiredFiles.length} required files and CLI version output`);
