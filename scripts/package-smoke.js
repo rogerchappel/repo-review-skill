@@ -2,6 +2,7 @@ const { spawnSync } = require('node:child_process');
 const pkg = require('../package.json');
 
 const requiredFiles = [
+  'package.json',
   'bin/repo-review-skill.js',
   'src/index.js',
   'src/formatter.js',
@@ -29,9 +30,20 @@ if (result.status !== 0) {
 const [packument] = JSON.parse(result.stdout);
 const packedFiles = new Set(packument.files.map((file) => file.path));
 const missing = requiredFiles.filter((file) => !packedFiles.has(file));
+const packedBin = packument.files.find((file) => file.path === pkg.bin['repo-review-skill']);
 
 if (missing.length > 0) {
   console.error(`package smoke failed; missing files: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
+if (!packedBin) {
+  console.error(`package smoke failed; bin target is not packed: ${pkg.bin['repo-review-skill']}`);
+  process.exit(1);
+}
+
+if ((packedBin.mode & 0o111) === 0) {
+  console.error(`package smoke failed; bin target is not executable in pack output: ${pkg.bin['repo-review-skill']}`);
   process.exit(1);
 }
 
@@ -49,4 +61,4 @@ if (versionResult.stdout.trim() !== pkg.version) {
   process.exit(1);
 }
 
-console.log(`package smoke passed; checked ${requiredFiles.length} required files and CLI version output`);
+console.log(`package smoke passed; checked ${requiredFiles.length} required files, executable bin metadata, and CLI version output`);
