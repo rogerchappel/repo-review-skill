@@ -77,10 +77,13 @@ npm run check
 npm test
 npm run smoke
 npm run package:smoke
+npm run install:smoke
 npm run release:check
 ```
 
-Use `npm run release:check` before publishing or opening a release PR.
+Use `npm run release:check` before publishing or opening a release PR. It runs
+syntax checks, tests, the fixture-backed CLI smoke, npm pack verification, and
+an installed-tarball CLI smoke.
 
 ## Release Notes
 
