@@ -41,7 +41,13 @@ Examples:
     process.exit(0);
   }
 
-  const parsed = parseArgs(args);
+  let parsed;
+  try {
+    parsed = parseArgs(args);
+  } catch (err) {
+    console.error(`Error: ${err.message}`);
+    process.exit(1);
+  }
   const { repoPath, outFlag, summaryFlag, noFsWrite } = parsed;
 
   if (!repoPath) {
@@ -83,33 +89,38 @@ Examples:
   }
 }
 
-function getFlag(args, flag) {
-  const idx = args.indexOf(flag);
-  if (idx === -1 || idx + 1 >= args.length) return null;
-  return args[idx + 1];
-}
-
 function parseArgs(args) {
-  const outFlag = getFlag(args, '--out');
-  const summaryFlag = getFlag(args, '--summary');
-  const noFsWrite = args.includes('--no-fs-write');
   const flagsWithValues = new Set(['--out', '--summary']);
+  let outFlag = null;
+  let summaryFlag = null;
+  let noFsWrite = false;
   let repoPath = null;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
 
     if (flagsWithValues.has(arg)) {
+      const value = args[i + 1];
+      if (!value || value.startsWith('-')) {
+        throw new Error(`${arg} requires a file value`);
+      }
+
+      if (arg === '--out') outFlag = value;
+      if (arg === '--summary') summaryFlag = value;
       i += 1;
       continue;
     }
 
-    if (arg.startsWith('-')) {
+    if (arg === '--no-fs-write') {
+      noFsWrite = true;
       continue;
     }
 
-    repoPath = arg;
-    break;
+    if (arg.startsWith('-')) {
+      throw new Error(`unknown option: ${arg}`);
+    }
+
+    if (!repoPath) repoPath = arg;
   }
 
   return { repoPath, outFlag, summaryFlag, noFsWrite };
