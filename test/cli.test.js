@@ -51,3 +51,37 @@ test('CLI preview mode does not create requested output files', () => {
   assert.match(result.stdout, /Total issues:/);
   assert.equal(fs.existsSync(jsonOut), false, '--no-fs-write keeps preview runs read-only');
 });
+
+test('CLI rejects unknown options', () => {
+  const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, '--bogus'], {
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr.trim(), 'Error: unknown option: --bogus');
+});
+
+for (const flag of ['--out', '--summary']) {
+  test(`CLI rejects a missing value for ${flag}`, () => {
+    const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, flag], {
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr.trim(), `Error: ${flag} requires a file value`);
+  });
+
+  test(`CLI rejects an option token as the value for ${flag}`, () => {
+    const result = spawnSync(
+      process.execPath,
+      [BIN, FIXTURE_DEMO, flag, '--no-fs-write'],
+      { encoding: 'utf8' },
+    );
+
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr.trim(), `Error: ${flag} requires a file value`);
+  });
+}

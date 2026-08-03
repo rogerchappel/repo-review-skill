@@ -38,6 +38,15 @@ Options:
   --help              Show this help
 ```
 
+Unknown options and missing file values are usage errors. The CLI exits with
+status 1 and writes a specific message to stderr, for example:
+
+```text
+Error: unknown option: --bogus
+Error: --out requires a file value
+Error: --summary requires a file value
+```
+
 ## Library API
 
 ```js
