@@ -33,7 +33,16 @@ function inspectTests(repoPath, _opts = {}) {
           testFrameworks.push(fw);
         }
       }
+      if (Object.values(pkg.scripts || {}).some(script => /(?:^|\s)node(?:\.exe)?\s+--test(?:\s|$)/.test(script))) {
+        hasTestFramework = true;
+        testFrameworks.push('node:test');
+      }
     } catch { /* already flagged by package inspector */ }
+  }
+
+  if (!hasTestFramework && testDirFound && directoryUsesNodeTest(testDirFound)) {
+    hasTestFramework = true;
+    testFrameworks.push('node:test');
   }
 
   if (!testDirFound && !hasTestFramework) {
@@ -73,6 +82,18 @@ function inspectTests(repoPath, _opts = {}) {
   }
 
   return issues;
+}
+
+function directoryUsesNodeTest(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory() && directoryUsesNodeTest(entryPath)) return true;
+    if (entry.isFile() && /\.(?:[cm]?js|ts)$/.test(entry.name)) {
+      const content = fs.readFileSync(entryPath, 'utf8');
+      if (/\b(?:require\s*\(\s*['"]node:test['"]\s*\)|from\s+['"]node:test['"]|import\s*\(\s*['"]node:test['"]\s*\))/.test(content)) return true;
+    }
+  }
+  return false;
 }
 
 module.exports = { inspectTests };

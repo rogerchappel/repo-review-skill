@@ -66,7 +66,7 @@ function inspectPackage(repoPath, _opts = {}) {
         title: 'Default npm test script', description: 'The default test placeholder means no test runner is configured.',
         fix: 'Install a test runner and configure the test script.' });
     }
-    if (!scripts.build) {
+    if (!scripts.build && requiresBuildStep(pkg, repoPath)) {
       issues.push({ id: 'pkg-build-script-missing', category: 'package', severity: 'medium',
         title: 'No build script', description: 'Users cannot run a standard build step.',
         fix: 'Add a build script appropriate for the project type.' });
@@ -84,6 +84,17 @@ function inspectPackage(repoPath, _opts = {}) {
   }
 
   return issues;
+}
+
+function requiresBuildStep(pkg, repoPath) {
+  const publishedEntries = [pkg.main, pkg.module, pkg.types, pkg.typings, pkg.bin, pkg.exports]
+    .flatMap(value => typeof value === 'object' && value !== null ? Object.values(value) : [value])
+    .flatMap(value => typeof value === 'object' && value !== null ? Object.values(value) : [value])
+    .filter(value => typeof value === 'string');
+  if (publishedEntries.some(entry => /(?:^|\/)(?:dist|build|lib)\//.test(entry))) return true;
+
+  return ['tsconfig.json', 'babel.config.js', 'babel.config.json', '.babelrc', 'rollup.config.js', 'vite.config.js']
+    .some(file => fs.existsSync(path.join(repoPath, file)));
 }
 
 module.exports = { inspectPackage };
