@@ -38,13 +38,19 @@ Options:
   --help              Show this help
 ```
 
-Unknown options and missing file values are usage errors. The CLI exits with
-status 1 and writes a specific message to stderr, for example:
+Exactly one repository path is required. Options may appear before or after it,
+but a second repository operand or a repeated `--out` or `--summary` option is a
+usage error. Usage errors are rejected before the repository is reviewed or any
+requested output file is created. The CLI exits with status 1 and writes a
+specific message to stderr, for example:
 
 ```text
 Error: unknown option: --bogus
 Error: --out requires a file value
 Error: --summary requires a file value
+Error: unexpected repository operand: ./another-project
+Error: duplicate option: --out
+Error: duplicate option: --summary
 ```
 
 ## Library API
