@@ -37,6 +37,25 @@ test('CLI accepts output flags before the repo path', () => {
   assert.ok(Array.isArray(parsed.issues));
 });
 
+test('CLI accepts output flags after the repo path', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-cli-'));
+  const jsonOut = path.join(tmpDir, 'review.json');
+  const markdownOut = path.join(tmpDir, 'review.md');
+
+  const result = spawnSync(
+    process.execPath,
+    [BIN, FIXTURE_DEMO, '--out', jsonOut, '--summary', markdownOut],
+    { encoding: 'utf8' },
+  );
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.ok(fs.existsSync(jsonOut), 'writes JSON report when --out follows the repo path');
+  assert.ok(
+    fs.existsSync(markdownOut),
+    'writes Markdown report when --summary follows the repo path',
+  );
+});
+
 test('CLI preview mode does not create requested output files', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-preview-'));
   const jsonOut = path.join(tmpDir, 'review.json');
@@ -61,6 +80,46 @@ test('CLI rejects unknown options', () => {
   assert.equal(result.stdout, '');
   assert.equal(result.stderr.trim(), 'Error: unknown option: --bogus');
 });
+
+test('CLI rejects a second repository operand before creating outputs', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-extra-'));
+  const jsonOut = path.join(tmpDir, 'review.json');
+  const markdownOut = path.join(tmpDir, 'review.md');
+  const secondRepo = path.join(tmpDir, 'another-repo');
+  fs.mkdirSync(secondRepo);
+
+  const result = spawnSync(
+    process.execPath,
+    [BIN, FIXTURE_DEMO, secondRepo, '--out', jsonOut, '--summary', markdownOut],
+    { encoding: 'utf8' },
+  );
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr.trim(), `Error: unexpected repository operand: ${secondRepo}`);
+  assert.equal(fs.existsSync(jsonOut), false);
+  assert.equal(fs.existsSync(markdownOut), false);
+});
+
+for (const flag of ['--out', '--summary']) {
+  test(`CLI rejects duplicate ${flag} before creating either output`, () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-duplicate-'));
+    const firstOut = path.join(tmpDir, 'first.out');
+    const secondOut = path.join(tmpDir, 'second.out');
+
+    const result = spawnSync(
+      process.execPath,
+      [BIN, FIXTURE_DEMO, flag, firstOut, flag, secondOut],
+      { encoding: 'utf8' },
+    );
+
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr.trim(), `Error: duplicate option: ${flag}`);
+    assert.equal(fs.existsSync(firstOut), false);
+    assert.equal(fs.existsSync(secondOut), false);
+  });
+}
 
 for (const flag of ['--out', '--summary']) {
   test(`CLI rejects a missing value for ${flag}`, () => {

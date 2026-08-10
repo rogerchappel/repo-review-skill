@@ -91,6 +91,7 @@ Examples:
 
 function parseArgs(args) {
   const flagsWithValues = new Set(['--out', '--summary']);
+  const seenFlags = new Set();
   let outFlag = null;
   let summaryFlag = null;
   let noFsWrite = false;
@@ -100,11 +101,16 @@ function parseArgs(args) {
     const arg = args[i];
 
     if (flagsWithValues.has(arg)) {
+      if (seenFlags.has(arg)) {
+        throw new Error(`duplicate option: ${arg}`);
+      }
+
       const value = args[i + 1];
       if (!value || value.startsWith('-')) {
         throw new Error(`${arg} requires a file value`);
       }
 
+      seenFlags.add(arg);
       if (arg === '--out') outFlag = value;
       if (arg === '--summary') summaryFlag = value;
       i += 1;
@@ -120,7 +126,10 @@ function parseArgs(args) {
       throw new Error(`unknown option: ${arg}`);
     }
 
-    if (!repoPath) repoPath = arg;
+    if (repoPath) {
+      throw new Error(`unexpected repository operand: ${arg}`);
+    }
+    repoPath = arg;
   }
 
   return { repoPath, outFlag, summaryFlag, noFsWrite };
