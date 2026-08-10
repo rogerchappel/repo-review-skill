@@ -4,17 +4,25 @@ Review any local code repo like a practical maintainer and output prioritized, t
 
 ## Quickstart
 
+The package is not currently published to the npm registry. Run it from a
+source checkout:
+
 ```bash
-# Install (optional for use with npx)
-npm install -g @rogerchappel/repo-review-skill
+git clone https://github.com/rogerchappel/repo-review-skill.git
+cd repo-review-skill
+npm install
 
 # Review a repo
-repo-review-skill ./my-project --out review.json --summary review.md
-repo-review-skill --out review.json --summary review.md ./my-project
+npm exec -- repo-review-skill ../my-project --out review.json --summary review.md
+npm exec -- repo-review-skill --out review.json --summary review.md ../my-project
 
-# Or run without installing globally
-npx @rogerchappel/repo-review-skill ./my-project --no-fs-write
+# Preview without writing files
+npm exec -- repo-review-skill ../my-project --no-fs-write
 ```
+
+After a future registry publication, the package will also support global
+installation and `npx @rogerchappel/repo-review-skill`. Until then, those
+registry-based commands will fail.
 
 ## What It Does
 
@@ -55,13 +63,18 @@ Error: duplicate option: --summary
 
 ## Library API
 
+From a source checkout, import the local package root:
+
 ```js
-const { review } = require('@rogerchappel/repo-review-skill');
+const { review } = require('./repo-review-skill');
 
 const result = await review('./my-repo');
 console.log(result.summary);
 // => { summary, issues, reportJson, reportMd }
 ```
+
+After registry publication, consumers can replace `./repo-review-skill` with
+`@rogerchappel/repo-review-skill`.
 
 ## Output Example
 
