@@ -63,6 +63,10 @@ console.log(result.summary);
 // => { summary, issues, reportJson, reportMd }
 ```
 
+`repoPath` must resolve to an existing directory. A nonexistent target rejects
+with `repo path does not exist: <absolute-path>`; an existing file or other
+non-directory target rejects with `repo path is not a directory: <absolute-path>`.
+
 ## Output Example
 
 ```
