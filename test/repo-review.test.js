@@ -1,4 +1,6 @@
 const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { review } = require('../src/index');
 
@@ -42,6 +44,23 @@ async function testNonExistentPathThrows() {
   }
 }
 
+// Existing non-directory paths are rejected before inspection
+async function testFilePathThrows() {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-target-'));
+  const filePath = path.join(tempDir, 'package.json');
+  fs.writeFileSync(filePath, '{}');
+
+  try {
+    await assert.rejects(
+      review(filePath),
+      err => err.message === `repo path is not a directory: ${filePath}`,
+    );
+    console.log('  ✓ testFilePathThrows');
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
 // Severity ordering is respected
 async function testIssuesAreRanked() {
   const result = await review(FIXTURE_DEMO);
@@ -62,6 +81,7 @@ function severityRank(s) {
   await testReviewReturnsStructuredResult();
   await testPackageInspectorsFlagIssues();
   await testNonExistentPathThrows();
+  await testFilePathThrows();
   await testIssuesAreRanked();
   console.log('All tests passed.');
 })();
