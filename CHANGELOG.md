@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Made the library API reject existing non-directory review targets before
+  running inspectors.
 - Added installed-package smoke coverage so release checks verify the packed
   tarball can be installed and run through its published CLI bin.
 - Expanded package smoke coverage to require `package.json`, packed bin
