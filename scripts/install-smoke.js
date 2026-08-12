@@ -24,6 +24,14 @@ function run(command, args, options = {}) {
 }
 
 const repoRoot = path.resolve(__dirname, '..');
+const readme = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
+const documentedCommand = 'npm exec -- repo-review-skill';
+
+if (!readme.includes(documentedCommand)) {
+  console.error(`install smoke failed; README must document \`${documentedCommand}\``);
+  process.exit(1);
+}
+
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-install-'));
 const packResult = run('npm', ['pack', '--silent'], { cwd: repoRoot });
 const tarballName = packResult.stdout.trim().split(/\r?\n/).at(-1);
@@ -33,15 +41,14 @@ try {
   run('npm', ['init', '-y', '--silent'], { cwd: tmpDir });
   run('npm', ['install', '--silent', tarballPath], { cwd: tmpDir });
 
-  const binPath = path.join(tmpDir, 'node_modules', '.bin', 'repo-review-skill');
-  const versionResult = run(binPath, ['--version'], { cwd: tmpDir });
+  const versionResult = run('npm', ['exec', '--', 'repo-review-skill', '--version'], { cwd: tmpDir });
 
   if (versionResult.stdout.trim() !== pkg.version) {
     console.error(`install smoke failed; expected version ${pkg.version}, got ${versionResult.stdout.trim()}`);
     process.exit(1);
   }
 
-  console.log(`install smoke passed; installed ${pkg.name} and ran repo-review-skill --version`);
+  console.log(`install smoke passed; installed ${pkg.name} and ran documented command: ${documentedCommand} --version`);
 } finally {
   fs.rmSync(tarballPath, { force: true });
   fs.rmSync(tmpDir, { recursive: true, force: true });

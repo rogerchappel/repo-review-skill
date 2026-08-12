@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Replaced unavailable npm registry install commands in the quickstart with a
+  tested source-checkout workflow and clarified which commands require a future
+  registry publication.
+- Updated installed-package smoke coverage to assert and execute the README's
+  documented `npm exec` command path.
 - Made the library API reject existing non-directory review targets before
   running inspectors.
 - Added installed-package smoke coverage so release checks verify the packed
