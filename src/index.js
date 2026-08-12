@@ -26,6 +26,9 @@ async function review(repoPath, options = {}) {
   if (!fs.existsSync(absPath)) {
     throw new Error(`repo path does not exist: ${absPath}`);
   }
+  if (!fs.statSync(absPath).isDirectory()) {
+    throw new Error(`repo path is not a directory: ${absPath}`);
+  }
 
   const allIssues = [];
 
