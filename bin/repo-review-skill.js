@@ -61,6 +61,20 @@ Examples:
     process.exit(1);
   }
 
+  for (const [flag, value] of [
+    ['--out', outFlag],
+    ['--summary', summaryFlag],
+  ]) {
+    if (value) {
+      const outputPath = path.resolve(value);
+      const relative = path.relative(absPath, outputPath);
+      if (relative === '' || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative))) {
+        console.error(`Error: ${flag} path must be outside the reviewed repository: ${outputPath}`);
+        process.exit(1);
+      }
+    }
+  }
+
   try {
     const result = await review(absPath);
 
