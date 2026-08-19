@@ -59,6 +59,16 @@ Error: --summary requires a file value
 Error: unexpected repository operand: ./another-project
 Error: duplicate option: --out
 Error: duplicate option: --summary
+Error: --out path must be outside the reviewed repository: /path/to/project/review.json
+```
+
+Both output paths must resolve outside the reviewed repository. The boundary
+check rejects the repository root, existing files, nonexistent nested paths,
+and relative or traversal spellings that normalize inside it before review or
+file writes begin. Choose an external output directory explicitly:
+
+```bash
+repo-review-skill ./my-project --out ../reports/review.json --summary ../reports/review.md
 ```
 
 ## Library API
@@ -94,7 +104,7 @@ repo-review-skill scanned /Users/roger/my-repo: 8 issue(s) — 1 critical, 3 hig
 
 ## Safety Notes
 
-- Read-only: no file modifications to the target repo
+- Read-only: output paths inside the target repo are rejected before review
 - No network access or external API calls
 - Safe to run on any project without side effects
 

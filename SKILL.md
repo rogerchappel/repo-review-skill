@@ -25,7 +25,8 @@ Use this skill when:
 ## Side-Effect Boundaries
 
 - **Read-only**: No modifications to the target repo
-- All output files (JSON/Markdown reports) are written to new locations, not the target repo
+- JSON and Markdown output paths must resolve outside the target repo; root,
+  nested, existing, and normalized-inside paths are rejected before review
 - No network calls, no git operations, no process spawning against the target
 
 ## Approval Requirements
@@ -38,8 +39,8 @@ Use this skill when:
 ### CLI
 
 ```bash
-# Full review with JSON + Markdown output
-repo-review-skill ~/projects/my-app --out review.json --summary review.md
+# Full review with JSON + Markdown output in an external directory
+repo-review-skill ~/projects/my-app --out ~/reviews/my-app.json --summary ~/reviews/my-app.md
 
 # Preview only (no files written)
 repo-review-skill ~/projects/my-app --no-fs-write

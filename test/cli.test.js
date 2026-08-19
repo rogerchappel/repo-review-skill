@@ -71,6 +71,35 @@ test('CLI preview mode does not create requested output files', () => {
   assert.equal(fs.existsSync(jsonOut), false, '--no-fs-write keeps preview runs read-only');
 });
 
+for (const scenario of [
+  { flag: '--out', target: '.', label: 'repository root' },
+  { flag: '--out', target: 'package.json', label: 'existing file' },
+  { flag: '--out', target: 'reports/new/review.json', label: 'nonexistent nested path' },
+  { flag: '--summary', target: 'reports/../README.md', label: 'normalized Markdown path' },
+]) {
+  test(`CLI rejects ${scenario.flag} ${scenario.label} inside the reviewed repository`, () => {
+    const packagePath = path.join(FIXTURE_DEMO, 'package.json');
+    const readmePath = path.join(FIXTURE_DEMO, 'README.md');
+    const packageBefore = fs.readFileSync(packagePath);
+    const readmeBefore = fs.readFileSync(readmePath);
+    const target = path.join(FIXTURE_DEMO, scenario.target);
+
+    const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, scenario.flag, target], {
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(
+      result.stderr.trim(),
+      `Error: ${scenario.flag} path must be outside the reviewed repository: ${path.resolve(target)}`,
+    );
+    assert.deepEqual(fs.readFileSync(packagePath), packageBefore);
+    assert.deepEqual(fs.readFileSync(readmePath), readmeBefore);
+    assert.equal(fs.existsSync(path.join(FIXTURE_DEMO, 'reports')), false);
+  });
+}
+
 test('CLI rejects unknown options', () => {
   const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, '--bogus'], {
     encoding: 'utf8',
