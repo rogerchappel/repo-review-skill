@@ -13,7 +13,7 @@ Local repo quality audit CLI and library for agents.
 - **Fixture-backed tests**: 5 tests covering structure, inspection, errors, ranking
 - **Release verification**: `npm run release:check` covers syntax, tests,
   fixture smoke, npm pack contents, executable bin metadata, and an installed
-  tarball CLI smoke
+  tarball CLI smoke, then verifies this fixture transcript against current behavior
 
 ## Verification Results
 ```

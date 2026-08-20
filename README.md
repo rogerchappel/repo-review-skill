@@ -132,3 +132,7 @@ an installed-tarball CLI smoke.
 Keep [CHANGELOG.md](./CHANGELOG.md) updated with user-facing changes before
 publishing. For release-candidate review notes, see
 [docs/RELEASE_CANDIDATE.md](./docs/RELEASE_CANDIDATE.md).
+
+The release gate also runs `npm run release-candidate:check`, which derives the
+demo fixture's issue and severity counts and ensures the checked-in release
+candidate transcript and installed command remain current.
