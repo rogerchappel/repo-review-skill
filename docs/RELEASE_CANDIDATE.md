@@ -10,7 +10,7 @@ Local repo quality audit CLI and library for agents.
 - **CLI**: `repo-review-skill <repo> --out review.json --summary review.md`
 - **Library**: `review(repoPath) => { summary, issues, reportJson, reportMd }`
 - **Agent integration**: Full SKILL.md with examples and safety boundaries
-- **Fixture-backed tests**: 4 tests covering structure, inspection, errors, ranking
+- **Fixture-backed tests**: 5 tests covering structure, inspection, errors, ranking
 - **Release verification**: `npm run release:check` covers syntax, tests,
   fixture smoke, npm pack contents, executable bin metadata, and an installed
   tarball CLI smoke
@@ -18,20 +18,21 @@ Local repo quality audit CLI and library for agents.
 ## Verification Results
 ```
 $ node --test test/repo-review.test.js
-✔ testReviewReturnsStructuredResult — 11 issues found
+✔ testReviewReturnsStructuredResult — 9 issues found
 ✔ testPackageInspectorsFlagIssues
 ✔ testNonExistentPathThrows
+✔ testFilePathThrows
 ✔ testIssuesAreRanked
 All tests passed.
 
 $ bin/repo-review-skill.js fixtures/demo-repo --no-fs-write
-repo-review-skill scanned fixtures/demo-repo: 11 issue(s) — 0 critical, 2 high, 5 medium, 4 low
+repo-review-skill scanned fixtures/demo-repo: 9 issue(s) — 0 critical, 3 high, 3 medium, 3 low
 
 $ npm run package:smoke
 package smoke passed; checked 10 required files, executable bin metadata, and CLI version output
 
 $ npm run install:smoke
-install smoke passed; installed @rogerchappel/repo-review-skill and ran repo-review-skill --version
+install smoke passed; installed @rogerchappel/repo-review-skill and ran documented command: npm exec -- repo-review-skill --version
 ```
 
 ## Branch Protection
