@@ -10,7 +10,7 @@ source checkout:
 ```bash
 git clone https://github.com/rogerchappel/repo-review-skill.git
 cd repo-review-skill
-npm install
+npm ci
 
 # Review a repo
 npm exec -- repo-review-skill ../my-project --out review.json --summary review.md
