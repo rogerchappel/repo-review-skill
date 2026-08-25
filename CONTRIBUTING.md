@@ -7,7 +7,7 @@ Thanks for helping improve `repo-review-skill`.
 Use Node.js 18 or newer.
 
 ```bash
-npm install
+npm ci
 npm run release:check
 ```
 
