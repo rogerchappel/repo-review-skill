@@ -61,13 +61,28 @@ Examples:
     process.exit(1);
   }
 
+  let absPathReal;
+  try {
+    absPathReal = resolveRealPath(absPath);
+  } catch {
+    console.error(`Error: unable to resolve repository path: ${absPath}`);
+    process.exit(1);
+  }
+
   for (const [flag, value] of [
     ['--out', outFlag],
     ['--summary', summaryFlag],
   ]) {
     if (value) {
       const outputPath = path.resolve(value);
-      const relative = path.relative(absPath, outputPath);
+      let outputPathReal;
+      try {
+        outputPathReal = resolveRealPath(outputPath);
+      } catch {
+        console.error(`Error: ${flag} path must be outside the reviewed repository: ${outputPath}`);
+        process.exit(1);
+      }
+      const relative = path.relative(absPathReal, outputPathReal);
       if (relative === '' || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative))) {
         console.error(`Error: ${flag} path must be outside the reviewed repository: ${outputPath}`);
         process.exit(1);
@@ -100,6 +115,68 @@ Examples:
   } catch (err) {
     console.error(`Review failed: ${err.message}`);
     process.exit(1);
+  }
+}
+
+/**
+ * Resolve a path through every symlink, including dangling final links and
+ * symlinked ancestor directories, returning a canonical absolute path.
+ *
+ * fs.realpathSync() only canonicalizes paths that already exist, so a
+ * dangling symlink (or a not-yet-existing file under a symlinked directory)
+ * would otherwise be judged on its lexical spelling, letting a report be
+ * written into the reviewed repository through the link.
+ *
+ * @throws {Error} on symlink loops and unresolvable paths.
+ */
+function resolveRealPath(target) {
+  const seen = new Set();
+  let current = path.resolve(target);
+  let hops = 0;
+
+  // Follow final-component symlinks even when their target does not exist.
+  while (hops < 256) {
+    hops += 1;
+    if (seen.has(current)) {
+      throw new Error(`symlink loop at ${current}`);
+    }
+    seen.add(current);
+    let stat;
+    try {
+      stat = fs.lstatSync(current);
+    } catch (error) {
+      if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
+        break;
+      }
+      throw error;
+    }
+    if (!stat.isSymbolicLink()) {
+      break;
+    }
+    current = path.resolve(path.dirname(current), fs.readlinkSync(current));
+  }
+  if (hops >= 256) {
+    throw new Error('too many symbolic links');
+  }
+
+  // Canonicalize the deepest existing ancestor (resolving symlinked
+  // directories and case), then re-append the not-yet-existing tail.
+  const tail = [];
+  let probe = current;
+  for (;;) {
+    try {
+      return path.join(fs.realpathSync.native(probe), ...tail.reverse());
+    } catch (error) {
+      if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
+        throw error;
+      }
+      tail.push(path.basename(probe));
+      const parent = path.dirname(probe);
+      if (parent === probe) {
+        return current;
+      }
+      probe = parent;
+    }
   }
 }
 
