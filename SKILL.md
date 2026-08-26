@@ -26,7 +26,8 @@ Use this skill when:
 
 - **Read-only**: No modifications to the target repo
 - JSON and Markdown output paths must resolve outside the target repo; root,
-  nested, existing, and normalized-inside paths are rejected before review
+  nested, existing, normalized-inside, and symlinked-inside paths (including
+  dangling links) are rejected before review
 - No network calls, no git operations, no process spawning against the target
 
 ## Approval Requirements

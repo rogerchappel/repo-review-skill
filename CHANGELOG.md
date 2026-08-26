@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Hardened the CLI output boundary so `--out` and `--summary` paths are
+  resolved through symbolic links (existing targets, dangling links, and
+  symlinked parent directories) before acceptance; a path whose real target
+  lands inside the reviewed repository is now rejected before review or file
+  writes begin.
 - Replaced unavailable npm registry install commands in the quickstart with a
   tested source-checkout workflow and clarified which commands require a future
   registry publication.
