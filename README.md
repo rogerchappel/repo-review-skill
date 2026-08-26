@@ -65,7 +65,10 @@ Error: --out path must be outside the reviewed repository: /path/to/project/revi
 Both output paths must resolve outside the reviewed repository. The boundary
 check rejects the repository root, existing files, nonexistent nested paths,
 and relative or traversal spellings that normalize inside it before review or
-file writes begin. Choose an external output directory explicitly:
+file writes begin. Output paths are resolved through symbolic links: a symlink
+whose target (existing file, dangling link, or symlinked parent directory)
+lands inside the repository is rejected just like a direct path. Choose an
+external output directory explicitly:
 
 ```bash
 repo-review-skill ./my-project --out ../reports/review.json --summary ../reports/review.md
@@ -104,7 +107,8 @@ repo-review-skill scanned /Users/roger/my-repo: 8 issue(s) — 1 critical, 3 hig
 
 ## Safety Notes
 
-- Read-only: output paths inside the target repo are rejected before review
+- Read-only: output paths (including symlinks) inside the target repo are
+  rejected before review
 - No network access or external API calls
 - Safe to run on any project without side effects
 
