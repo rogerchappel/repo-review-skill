@@ -100,6 +100,119 @@ for (const scenario of [
   });
 }
 
+for (const scenario of [
+  { flag: '--out', targetName: 'package.json', symlinkName: 'review-link.json', label: 'existing file' },
+  { flag: '--summary', targetName: 'README.md', symlinkName: 'summary-link.md', label: 'existing file' },
+]) {
+  test(`CLI rejects ${scenario.flag} symlinked to an ${scenario.label} inside the reviewed repository`, () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-symlink-'));
+    const linkPath = path.join(tmpDir, scenario.symlinkName);
+    const targetInside = path.join(FIXTURE_DEMO, scenario.targetName);
+    const targetBefore = fs.readFileSync(targetInside);
+    fs.symlinkSync(targetInside, linkPath);
+
+    const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, scenario.flag, linkPath], {
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(
+      result.stderr.trim(),
+      `Error: ${scenario.flag} path must be outside the reviewed repository: ${path.resolve(linkPath)}`,
+    );
+    assert.deepEqual(
+      fs.readFileSync(targetInside),
+      targetBefore,
+      'does not write through the symlink into the reviewed repository',
+    );
+  });
+}
+
+test('CLI rejects --out whose parent directory is a symlink into the reviewed repository', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-symlink-dir-'));
+  const linkDir = path.join(tmpDir, 'linked-out');
+  fs.symlinkSync(FIXTURE_DEMO, linkDir, 'dir');
+  const target = path.join(linkDir, 'review.json');
+
+  const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, '--out', target], {
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(
+    result.stderr.trim(),
+    `Error: --out path must be outside the reviewed repository: ${path.resolve(target)}`,
+  );
+  assert.equal(
+    fs.existsSync(path.join(FIXTURE_DEMO, 'review.json')),
+    false,
+    'does not create a report inside the reviewed repository',
+  );
+});
+
+test('CLI rejects a dangling --summary symlink whose target is inside the reviewed repository', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-symlink-dangling-'));
+  const linkPath = path.join(tmpDir, 'summary-link.md');
+  const targetInside = path.join(FIXTURE_DEMO, 'never-written.md');
+  fs.symlinkSync(targetInside, linkPath);
+
+  const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, '--summary', linkPath], {
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(
+    result.stderr.trim(),
+    `Error: --summary path must be outside the reviewed repository: ${path.resolve(linkPath)}`,
+  );
+  assert.equal(
+    fs.existsSync(targetInside),
+    false,
+    'does not create the report through a dangling symlink into the reviewed repository',
+  );
+});
+
+test('CLI rejects an output path inside the reviewed repository when the repo is reached via a symlink', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-repo-link-'));
+  const repoLink = path.join(tmpDir, 'repo-link');
+  fs.symlinkSync(FIXTURE_DEMO, repoLink, 'dir');
+  const target = path.join(repoLink, 'package.json');
+  const packageBefore = fs.readFileSync(path.join(FIXTURE_DEMO, 'package.json'));
+
+  const result = spawnSync(process.execPath, [BIN, repoLink, '--out', target], {
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(
+    result.stderr.trim(),
+    `Error: --out path must be outside the reviewed repository: ${path.resolve(target)}`,
+  );
+  assert.deepEqual(fs.readFileSync(path.join(FIXTURE_DEMO, 'package.json')), packageBefore);
+});
+
+test('CLI allows --out symlinked to a file outside the reviewed repository', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-skill-symlink-outside-'));
+  const realTarget = path.join(tmpDir, 'external.json');
+  const linkPath = path.join(tmpDir, 'review-link.json');
+  fs.symlinkSync(realTarget, linkPath);
+
+  const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, '--out', linkPath], {
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /repo-review-skill scanned/);
+  assert.ok(fs.existsSync(realTarget), 'writes through the symlink to the external target');
+  assert.equal(fs.lstatSync(linkPath).isSymbolicLink(), true, 'keeps the external symlink intact');
+  const parsed = JSON.parse(fs.readFileSync(realTarget, 'utf8'));
+  assert.equal(parsed.repo, FIXTURE_DEMO);
+});
+
 test('CLI rejects unknown options', () => {
   const result = spawnSync(process.execPath, [BIN, FIXTURE_DEMO, '--bogus'], {
     encoding: 'utf8',
