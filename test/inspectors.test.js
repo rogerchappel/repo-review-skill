@@ -22,12 +22,14 @@ function issueIds(issues) {
   return issues.map(issue => issue.id);
 }
 
-test('README placeholder descriptions are not treated as unfinished content', () => {
-  const repo = fixture({
-    'README.md': '# Tool\n\n## Installation\nInstall it.\n\n## Usage\nChecks placeholder text in templates.\n\n## License\nMIT.\n',
+for (const prose of ['Checks placeholder text in templates.', 'Use TODO comments to track future work.']) {
+  test(`README explanatory prose is not treated as unfinished: ${prose}`, () => {
+    const repo = fixture({
+      'README.md': `# Tool\n\n## Installation\nInstall it.\n\n## Usage\n${prose}\n\n## License\nMIT.\n`,
+    });
+    assert.doesNotMatch(issueIds(inspectReadme(repo)).join(','), /readme-placeholders/);
   });
-  assert.doesNotMatch(issueIds(inspectReadme(repo)).join(','), /readme-placeholders/);
-});
+}
 
 for (const marker of ['TODO: document flags', 'Status: TBD', 'FIXME update this', '<placeholder>', 'Placeholder content goes here']) {
   test(`README unfinished marker is detected: ${marker}`, () => {
