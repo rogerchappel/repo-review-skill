@@ -43,14 +43,17 @@ function inspectReadme(repoPath, _opts = {}) {
       fix: 'Add at least License and Contributing sections.' });
   }
 
-  // Flag unfinished markers, not ordinary prose that describes placeholders.
-  const hasUnfinishedMarker = /\b(?:TBD|TODO|FIXME)\b/i.test(content)
+  // Flag actionable line-leading markers and explicit TBD statuses, not prose
+  // that merely discusses conventions such as "Use TODO comments".
+  const hasUnfinishedMarker = /^(?:\s*(?:[-*+]\s+|\d+[.)]\s+|(?:\/\/|#|<!--)\s*)?)(?:TODO|FIXME)\b/im.test(content)
+    || /\bstatus\s*:\s*TBD\b/i.test(content)
+    || /^\s*TBD\s*[.!]?\s*$/im.test(content)
     || /(?:<|\[)placeholder(?:>|\])/i.test(content)
     || /\b(?:placeholder\s+(?:content|text)\s+(?:goes|is)\s+here|replace\s+(?:this|the)\s+placeholder)\b/i.test(content);
   if (hasUnfinishedMarker) {
     issues.push({ id: 'readme-placeholders', category: 'readme', severity: 'medium',
-      title: 'README contains placeholder text (TBD/TODO/FIXME)', description: 'Placeholders reduce credibility for visitors.',
-      fix: 'Replace placeholder text with real content.' });
+      title: 'README contains an unfinished marker or placeholder', description: 'Actionable TODO/FIXME markers, TBD statuses, and placeholder text reduce credibility for visitors.',
+      fix: 'Resolve the unfinished item or replace placeholder text with real content.' });
   }
 
   return issues;
