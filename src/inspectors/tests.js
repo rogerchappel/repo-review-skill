@@ -72,7 +72,9 @@ function inspectTests(repoPath, _opts = {}) {
     try {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
       const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
-      if (!allDeps['nyc'] && !allDeps['c8'] && !allDeps['@istanbuljs/nyc-config-babel']) {
+      const scripts = Object.values(pkg.scripts || {});
+      const usesNodeCoverage = scripts.some(script => /(?:^|\s)--experimental-test-coverage(?:\s|$)/.test(script));
+      if (!allDeps['nyc'] && !allDeps['c8'] && !allDeps['@istanbuljs/nyc-config-babel'] && !usesNodeCoverage) {
         issues.push({ id: 'tests-no-coverage', category: 'tests', severity: 'low',
           title: 'No coverage tool configured',
           description: 'Coverage tools help track test completeness.',

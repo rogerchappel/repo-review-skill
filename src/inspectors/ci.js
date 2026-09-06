@@ -11,12 +11,12 @@ function inspectCI(repoPath, _opts = {}) {
     { path: '.github/workflows', check: (p) => {
       if (!fs.existsSync(p) || !fs.statSync(p).isDirectory()) return false;
       const files = fs.readdirSync(p).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
-      return files.length > 0;
+      return files.some(file => isGitHubWorkflow(path.join(p, file)));
     }},
-    { path: '.gitlab-ci.yml', check: (p) => fs.existsSync(p) },
-    { path: '.circleci/config.yml', check: (p) => fs.existsSync(p) },
-    { path: '.travis.yml', check: (p) => fs.existsSync(p) },
-    { path: 'azure-pipelines.yml', check: (p) => fs.existsSync(p) },
+    { path: '.gitlab-ci.yml', check: isNonEmptyFile },
+    { path: '.circleci/config.yml', check: isNonEmptyFile },
+    { path: '.travis.yml', check: isNonEmptyFile },
+    { path: 'azure-pipelines.yml', check: isNonEmptyFile },
   ];
 
   let ciFound = null;
@@ -36,6 +36,16 @@ function inspectCI(repoPath, _opts = {}) {
   }
 
   return issues;
+}
+
+function isNonEmptyFile(file) {
+  return fs.existsSync(file) && fs.statSync(file).isFile() && fs.readFileSync(file, 'utf8').trim().length > 0;
+}
+
+function isGitHubWorkflow(file) {
+  if (!isNonEmptyFile(file)) return false;
+  const content = fs.readFileSync(file, 'utf8');
+  return /^on\s*:/m.test(content) && /^jobs\s*:\s*\n[ \t]+\S/m.test(content);
 }
 
 module.exports = { inspectCI };

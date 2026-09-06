@@ -10,7 +10,7 @@ function inspectExamples(repoPath, _opts = {}) {
   let found = null;
   for (const d of exampleDirs) {
     const p = path.join(repoPath, d);
-    if (fs.existsSync(p) && fs.statSync(p).isDirectory()) {
+    if (fs.existsSync(p) && fs.statSync(p).isDirectory() && directoryContainsFile(p)) {
       found = d;
       break;
     }
@@ -24,6 +24,13 @@ function inspectExamples(repoPath, _opts = {}) {
   }
 
   return issues;
+}
+
+function directoryContainsFile(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).some(entry => {
+    if (entry.isFile()) return true;
+    return entry.isDirectory() && directoryContainsFile(path.join(dir, entry.name));
+  });
 }
 
 module.exports = { inspectExamples };
