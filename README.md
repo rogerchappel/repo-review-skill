@@ -28,9 +28,11 @@ registry-based commands will fail.
 
 - Inspects package.json for missing scripts, descriptions, and defaults
 - Checks README for installation instructions, structure, and placeholder text
-- Verifies test setup: framework, directory, coverage
-- Detects CI configuration (GitHub Actions, GitLab CI, CircleCI, etc.)
-- Looks for examples/demo directories
+- Verifies test setup: framework, directory, and coverage, including Node's
+  built-in test coverage flag
+- Detects usable CI configuration rather than empty or placeholder workflow
+  files (GitHub Actions, GitLab CI, CircleCI, etc.)
+- Looks for examples/demo directories containing at least one file
 - Checks for LICENSE file
 - Ranks all issues by severity (critical → low) and outputs JSON + Markdown
 
