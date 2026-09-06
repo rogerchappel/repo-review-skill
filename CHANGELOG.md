@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Required CI and example indicators to contain usable files, and recognized
+  Node's built-in test coverage flag without requiring nyc or c8.
 - Hardened the CLI output boundary so `--out` and `--summary` paths are
   resolved through symbolic links (existing targets, dangling links, and
   symlinked parent directories) before acceptance; a path whose real target
