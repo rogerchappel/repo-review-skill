@@ -7,6 +7,8 @@ const test = require('node:test');
 const { inspectPackage } = require('../src/inspectors/package');
 const { inspectReadme } = require('../src/inspectors/readme');
 const { inspectTests } = require('../src/inspectors/tests');
+const { inspectCI } = require('../src/inspectors/ci');
+const { inspectExamples } = require('../src/inspectors/examples');
 
 function fixture(files) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-review-inspector-'));
@@ -60,6 +62,39 @@ test('test directories without an executable test setup remain flagged', () => {
     'test/example.js': 'module.exports = {};\n',
   });
   assert.ok(issueIds(inspectTests(repo)).includes('tests-no-framework'));
+});
+
+test('empty and non-workflow YAML do not satisfy GitHub Actions detection', () => {
+  for (const content of ['', '# documentation only\n', 'name: Notes\ndescription: not a workflow\n']) {
+    const repo = fixture({ '.github/workflows/placeholder.yml': content });
+    assert.ok(issueIds(inspectCI(repo)).includes('ci-missing'));
+  }
+});
+
+test('an executable GitHub Actions workflow satisfies CI detection', () => {
+  const repo = fixture({
+    '.github/workflows/ci.yml': 'name: CI\non: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm test\n',
+  });
+  assert.ok(!issueIds(inspectCI(repo)).includes('ci-missing'));
+});
+
+test('an empty examples directory does not satisfy example detection', () => {
+  const repo = fixture({ 'package.json': '{}' });
+  fs.mkdirSync(path.join(repo, 'examples'));
+  assert.ok(issueIds(inspectExamples(repo)).includes('examples-missing'));
+});
+
+test('an examples directory containing a file satisfies example detection', () => {
+  const repo = fixture({ 'examples/basic.js': 'console.log("example");\n' });
+  assert.ok(!issueIds(inspectExamples(repo)).includes('examples-missing'));
+});
+
+test('Node built-in test coverage is recognized without nyc or c8', () => {
+  const repo = fixture({
+    'package.json': JSON.stringify({ scripts: { test: 'node --test --experimental-test-coverage' } }),
+    'test/example.test.js': "require('node:test');\n",
+  });
+  assert.ok(!issueIds(inspectTests(repo)).includes('tests-no-coverage'));
 });
 
 test('directly executable JavaScript packages do not require a build script', () => {
