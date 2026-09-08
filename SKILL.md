@@ -10,7 +10,7 @@ Use this skill when:
 
 ## Required Tools/Inputs
 
-- Node.js 18+ (runtime for the CLI)
+- Node.js 22+ (runtime for the CLI)
 - A local repo directory to review
 
 ## What It Does

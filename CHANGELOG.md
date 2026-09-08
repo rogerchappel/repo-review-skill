@@ -22,7 +22,8 @@ All notable changes to this project will be documented in this file.
   tarball can be installed and run through its published CLI bin.
 - Expanded package smoke coverage to require `package.json`, packed bin
   metadata, and executable permissions for the CLI entry point.
-- Updated CI to run the release check on Node.js 18 and 20.
+- Raised the supported runtime to Node.js 22+ and updated CI to run the release
+  check on Node.js 22 and 24.
 - Fixed CLI parsing so `--out` and `--summary` can appear before the repo path.
 - Added `--version` output for install and package smoke checks.
 - Expanded the syntax check to cover the CLI bin, nested source files,
