@@ -4,7 +4,7 @@ Thanks for helping improve `repo-review-skill`.
 
 ## Development
 
-Use Node.js 18 or newer.
+Use Node.js 22 or newer.
 
 ```bash
 npm ci
