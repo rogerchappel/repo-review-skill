@@ -12,14 +12,15 @@ function inspectTests(repoPath, _opts = {}) {
 
   // Check for test files/ dirs
   const testDirs = ['test', 'tests', '__tests__', 'spec', 'specs'];
-  let testDirFound = null;
+  const testDirectories = [];
   for (const d of testDirs) {
     const p = path.join(repoPath, d);
     if (fs.existsSync(p) && fs.statSync(p).isDirectory()) {
-      testDirFound = p;
-      break;
+      testDirectories.push(p);
     }
   }
+  const testDirFound = testDirectories[0] || null;
+  const hasTestFiles = testDirectories.some(directoryHasTests);
 
   // Check package.json for test deps
   if (fs.existsSync(pkgPath)) {
@@ -40,9 +41,16 @@ function inspectTests(repoPath, _opts = {}) {
     } catch { /* already flagged by package inspector */ }
   }
 
-  if (!hasTestFramework && testDirFound && directoryUsesNodeTest(testDirFound)) {
+  if (!hasTestFramework && testDirectories.some(directoryUsesNodeTest)) {
     hasTestFramework = true;
     testFrameworks.push('node:test');
+  }
+
+  if (testDirFound && !hasTestFiles) {
+    issues.push({ id: 'tests-no-files', category: 'tests', severity: 'high',
+      title: 'Test directory contains no recognized test files',
+      description: 'A test directory or installed framework alone does not provide executable regression coverage.',
+      fix: 'Add a test file using a conventional name such as example.test.js, test_example.py, or example_test.go.' });
   }
 
   if (!testDirFound && !hasTestFramework) {
@@ -96,6 +104,25 @@ function directoryUsesNodeTest(dir) {
     }
   }
   return false;
+}
+
+function directoryHasTests(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory() && directoryHasTests(entryPath)) return true;
+    if (!entry.isFile()) continue;
+    if (isConventionalTestFilename(entry.name)) return true;
+    if (/\.(?:[cm]?js|tsx?)$/i.test(entry.name)) {
+      const content = fs.readFileSync(entryPath, 'utf8');
+      if (/\b(?:require\s*\(\s*['"]node:test['"]\s*\)|from\s+['"]node:test['"]|import\s*\(\s*['"]node:test['"]\s*\))/.test(content)) return true;
+    }
+  }
+  return false;
+}
+
+function isConventionalTestFilename(filename) {
+  const stem = filename.replace(/\.[^.]+$/, '');
+  return /(?:^test(?:[-_.]|$)|(?:[-_.](?:test|tests|spec))$|Test$)/.test(stem);
 }
 
 module.exports = { inspectTests };
