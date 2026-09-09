@@ -64,6 +64,38 @@ test('test directories without an executable test setup remain flagged', () => {
   assert.ok(issueIds(inspectTests(repo)).includes('tests-no-framework'));
 });
 
+test('an installed framework does not hide an empty test directory', () => {
+  const repo = fixture({
+    'package.json': JSON.stringify({ scripts: { test: 'vitest' }, devDependencies: { vitest: '1.0.0' } }),
+  });
+  fs.mkdirSync(path.join(repo, 'test'));
+  assert.ok(issueIds(inspectTests(repo)).includes('tests-no-files'));
+});
+
+test('documentation-only test directories do not count as executable evidence', () => {
+  const repo = fixture({
+    'package.json': JSON.stringify({ devDependencies: { mocha: '10.0.0' } }),
+    'test/README.md': '# Planned tests\n',
+    'test/fixtures/input.json': '{}\n',
+  });
+  assert.ok(issueIds(inspectTests(repo)).includes('tests-no-files'));
+});
+
+test('nested conventional test filenames count as executable evidence', () => {
+  const repo = fixture({
+    'package.json': JSON.stringify({ devDependencies: { jest: '29.0.0' } }),
+    'tests/unit/parser.spec.ts': 'describe("parser", () => {});\n',
+  });
+  assert.ok(!issueIds(inspectTests(repo)).includes('tests-no-files'));
+});
+
+test('common cross-language test filenames count as executable evidence', () => {
+  for (const filename of ['test/unit/test_parser.py', 'tests/parser_test.go', 'spec/ParserTest.java']) {
+    const repo = fixture({ [filename]: 'test fixture\n' });
+    assert.ok(!issueIds(inspectTests(repo)).includes('tests-no-files'), filename);
+  }
+});
+
 test('empty and non-workflow YAML do not satisfy GitHub Actions detection', () => {
   for (const content of ['', '# documentation only\n', 'name: Notes\ndescription: not a workflow\n']) {
     const repo = fixture({ '.github/workflows/placeholder.yml': content });
