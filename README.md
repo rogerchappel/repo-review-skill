@@ -28,8 +28,9 @@ registry-based commands will fail.
 
 - Inspects package.json for missing scripts, descriptions, and defaults
 - Checks README for installation instructions, structure, and placeholder text
-- Verifies test setup: framework, directory, and coverage, including Node's
-  built-in test coverage flag
+- Verifies test setup using recursively discovered conventional test filenames
+  (not directory presence alone), framework configuration, and coverage,
+  including Node's built-in test imports and coverage flag
 - Detects usable CI configuration rather than empty or placeholder workflow
   files (GitHub Actions, GitLab CI, CircleCI, etc.)
 - Looks for examples/demo directories containing at least one file
